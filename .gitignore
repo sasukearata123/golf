@@ -1,0 +1,20 @@
+# parent directory gitignore
+golf-app/node_modules/
+golf-app/.next/
+golf-app/.env
+golf-app/.env.local
+golf-app/.env.development.local
+golf-app/.env.test.local
+golf-app/.env.production.local
+golf-app/npm-debug.log*
+golf-app/yarn-debug.log*
+golf-app/yarn-error.log*
+golf-app/pnpm-debug.log*
+golf-app/lerna-debug.log*
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

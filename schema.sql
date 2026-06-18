@@ -47,6 +47,17 @@ CREATE TABLE IF NOT EXISTS public.draws (
     winners_count INTEGER DEFAULT 0
 );
 
+-- Helper Function to resolve RLS recursion on the profiles table
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql;
+
 -- Enable Row Level Security
 ALTER TABLE public.charities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -58,12 +69,7 @@ CREATE POLICY "Allow public read access to charities" ON public.charities
     FOR SELECT USING (true);
 
 CREATE POLICY "Allow admin to manage charities" ON public.charities
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
-        )
-    );
+    FOR ALL USING (public.is_admin());
 
 -- Policies for Profiles
 CREATE POLICY "Allow public read/update own profile" ON public.profiles
@@ -76,36 +82,21 @@ CREATE POLICY "Allow users to insert own profile" ON public.profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Allow admin to manage all profiles" ON public.profiles
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
-        )
-    );
+    FOR ALL USING (public.is_admin());
 
 -- Policies for Golf Scores
 CREATE POLICY "Allow users to manage own scores" ON public.golf_scores
     FOR ALL USING (auth.uid() = user_id);
 
 CREATE POLICY "Allow admin to manage all scores" ON public.golf_scores
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
-        )
-    );
+    FOR ALL USING (public.is_admin());
 
 -- Policies for Draws
 CREATE POLICY "Allow public read access to draws" ON public.draws
     FOR SELECT USING (true);
 
 CREATE POLICY "Allow admin to manage draws" ON public.draws
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM public.profiles
-            WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
-        )
-    );
+    FOR ALL USING (public.is_admin());
 
 -- Seed Initial Charity Data
 INSERT INTO public.charities (id, name, description, image, upcoming_event, featured, total_donated)

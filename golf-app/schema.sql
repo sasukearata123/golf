@@ -58,7 +58,7 @@ CREATE POLICY "Allow public read access to charities" ON public.charities
     FOR SELECT USING (true);
 
 CREATE POLICY "Allow admin to manage charities" ON public.charities
-    ALL USING (
+    FOR ALL USING (
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
@@ -76,7 +76,7 @@ CREATE POLICY "Allow users to insert own profile" ON public.profiles
     FOR INSERT WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Allow admin to manage all profiles" ON public.profiles
-    ALL USING (
+    FOR ALL USING (
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
@@ -85,10 +85,10 @@ CREATE POLICY "Allow admin to manage all profiles" ON public.profiles
 
 -- Policies for Golf Scores
 CREATE POLICY "Allow users to manage own scores" ON public.golf_scores
-    ALL USING (auth.uid() = user_id);
+    FOR ALL USING (auth.uid() = user_id);
 
 CREATE POLICY "Allow admin to manage all scores" ON public.golf_scores
-    ALL USING (
+    FOR ALL USING (
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
@@ -100,7 +100,7 @@ CREATE POLICY "Allow public read access to draws" ON public.draws
     FOR SELECT USING (true);
 
 CREATE POLICY "Allow admin to manage draws" ON public.draws
-    ALL USING (
+    FOR ALL USING (
         EXISTS (
             SELECT 1 FROM public.profiles
             WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'
